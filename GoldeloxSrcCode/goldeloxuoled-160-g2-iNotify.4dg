@@ -1,0 +1,123 @@
+#platform "GOLDELOX"
+#inherit "4DGL_16bitColours.fnc"
+
+func cleanScrean()
+      var count := 0;
+      txt_MoveCursor(1,0);
+      while(count < 16)
+           print("                                  \n");
+           count++;
+      wend
+      txt_MoveCursor(1,0);
+      count := 0;
+endfunc
+
+
+//48 vars = 96 chars
+var combuf[48];
+//-------------------------------------------------------------------------------------------//
+func main()
+    var chr, e, e2;
+    var char;
+    var count := 0;
+    var timeloop := 0;
+
+    e := 0;
+    e2 := 0;
+    var c :=0;
+    var sec :=0;
+
+    var ref := 0;
+
+
+    // set outline colour, gfx_Cls() will draw outline
+    gfx_Set(OUTLINE_COLOUR, DARKOLIVEGREEN);
+    gfx_Cls();
+
+    // txt_Set(FONT_SIZE, FONT_SMALL);
+    txt_MoveCursor(0,0); // reset cursor to line 1, column 1
+    putstr("Connecting..pass:1234");
+    txt_MoveCursor(0,0);
+
+    //txt_MoveCursor(0,1);
+    setbaud(BAUD_9600);    //  9600 baud comms
+
+    // set up a comms circular buffer, use the entire buffer, no sync character
+    com_Init(combuf, 48, 0);
+
+    repeat
+        repeat
+
+            while ((char := serin()) >= 0)
+
+               //` special char indicate clearScreen
+               if(char == '`')
+                    cleanScrean();
+                    ref := 0;
+               endif
+
+               //special char, show time
+               if(char == '~')
+                    cleanScrean();
+
+                    txt_MoveCursor(6,4);
+                    txt_Set(TEXT_WIDTH,3);
+                    txt_Set(TEXT_HEIGHT,3);
+
+                    while ((char := serin()) >= 0)
+                        if(timeloop >= 5)
+                            ref := 0;
+                            txt_Set(TEXT_WIDTH,1);
+                            txt_Set(TEXT_HEIGHT,1);
+                            txt_MoveCursor(1,0);
+                            timeloop := 0;
+                            break;
+                        else
+                        txt_Set(TEXT_WIDTH,3);
+                        txt_Set(TEXT_HEIGHT,3);
+                        putch(char);
+                        timeloop++;
+                        endif
+                    wend
+
+                  txt_MoveCursor(1,0);
+               endif
+               timeloop := 0;
+
+              //new line
+              if(char == '>')
+                if(ref == 14)
+                    cleanScrean();
+                    ref :=0;
+                endif
+                print("\n");
+                c := 0;
+                ref++;
+              endif
+
+              //print char
+              putch(char);
+              c++;
+            wend
+
+            if (com_Full() || com_Error())
+                txt_MoveCursor(0,0);
+                combuf[48] := 0;
+                count :=0;
+                count := 0;
+                timeloop := 0;
+                e := 0;
+                e2 := 0;
+                c :=0;
+                sec :=0;
+                ref := 0;
+                main();
+            endif
+
+            pause(2350);
+        until ( com_Full() || com_Error() );      // reset if error occurred
+    forever
+
+
+endfunc
+
