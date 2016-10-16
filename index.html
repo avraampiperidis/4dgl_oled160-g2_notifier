@@ -331,9 +331,25 @@ And this is how we send messages</p>
 <p>Now that we finished from the android app<br>
 we gona see how to 
 *build/connect/put together the modules<br>
-*program the driver module
-*and start it.
-<br></p>
+*program the driver module<br>
+*and start it.<br>
+<br>
+Lets start with the uOLED-160-G2 Display Module its self<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic9.jpg?raw=true" alt="pic9"><br>
+We gona mention some important stuff about the monitor<br>
+Fist we need to understand some basic input output pins.<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic10.jpg?raw=true" alt="pic10">
+<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic11.jpg?raw=true" alt="pic11">
+<br>
+From the above ween to remember/know the following:<br>
+Pin 1:Input voltage supply,this is where the display taking power<br>
+  in out case its from usb power bank the +pin to Pin 1.<br>
+Pin 2:Output voltage, When we connect the bluetooth module to the display<br>
+  it need power to work, this is where it gets it.<br>
+Pin 5:RX, this receives the data/bytes from the bluetooth module.<br>
+Pin 7:Ground for usb power bank<br>
+PIn 8:Ground for bluetooth module<br></p>
       </section>
     </div>
 
