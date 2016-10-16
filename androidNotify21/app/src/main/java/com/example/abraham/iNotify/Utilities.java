@@ -26,6 +26,7 @@ public class Utilities  {
 
 
 
+
     public static String convertEltoEn(String el) {
 
         char[] tmp;
@@ -108,10 +109,7 @@ public class Utilities  {
             if(tmp[i] == 'ω' || tmp[i] == 'Ω') {
                 tmp[i] = 'w';
             }
-
-
         }
-
 
         String fnl = new String(tmp);
         return fnl;

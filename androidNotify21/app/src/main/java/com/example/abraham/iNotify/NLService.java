@@ -135,25 +135,25 @@ public class NLService extends NotificationListenerService {
         Notification mNotification = sbn.getNotification();
         if(mNotification != null) {
 
-            if(mNotification.extras.getString(Notification.EXTRA_TITLE).contains("Επιλογή")) {
+            String titleContent = mNotification.extras.getString(Notification.EXTRA_TITLE);
+
+            if(titleContent.contains("Επιλογή")) {
                 inputKeyboard = true;
-            }else if(mNotification.extras.getString(Notification.EXTRA_TITLE).contains("Εγκατ.")) {
+            }else if(titleContent.contains("Εγκατ.") || titleContent.contains("Install software")) {
             }
-            else if(mNotification.extras.getString(Notification.EXTRA_TITLE).contains("σύνδεση στο PC")) {
-            } else if(mNotification.extras.getString(Notification.EXTRA_TITLE).contains("Συνδ. εφαρμ.")) {
-            } else if(mNotification.extras.getString(Notification.EXTRA_TEXT).contains("Εισερχόμενη")) {
+            else if(titleContent.contains("σύνδεση στο PC") || titleContent.contains("Connected to PC")) {
+            } else if(titleContent.contains("Συνδ. εφαρμ.") || titleContent.contains("USB deb")) {
+            } else if(mNotification.extras.getString(Notification.EXTRA_TEXT).contains("Εισερχόμενη") || mNotification.extras.getString(Notification.EXTRA_TEXT).contains("incoming call")) {
                 try {
                     Thread.sleep(2000);
-                    try {
-                        mmOutputStream.write('>');
-                        mmOutputStream.write(Utilities.splitStringNewLine(Utilities.convertEltoEn(mNotification.extras.getString(Notification.EXTRA_TEXT))).getBytes());
-                        Thread.sleep(400);
-                        mmOutputStream.write('>');
-                        mmOutputStream.write(Utilities.splitStringNewLine(Utilities.convertEltoEn(mNotification.extras.getString(Notification.EXTRA_TITLE))).getBytes());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    mmOutputStream.write('>');
+                    mmOutputStream.write(Utilities.splitStringNewLine(Utilities.convertEltoEn(mNotification.extras.getString(Notification.EXTRA_TEXT))).getBytes());
+                    Thread.sleep(400);
+                    mmOutputStream.write('>');
+                    mmOutputStream.write(Utilities.splitStringNewLine(Utilities.convertEltoEn(mNotification.extras.getString(Notification.EXTRA_TITLE))).getBytes());
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }catch (IOException e) {
                     e.printStackTrace();
                 }
             } else if(mNotification.extras.getString(Notification.EXTRA_TITLE).contains("Αναπάντητη")) {
