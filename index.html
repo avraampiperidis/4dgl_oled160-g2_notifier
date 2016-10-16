@@ -156,6 +156,59 @@ witch takes the text from edittext and send's it to outputstream "bluetooth at o
 
 <p><br>
 <br></p>
+
+<h5>
+<a id="nlservice" class="anchor" href="#nlservice" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>NLService</h5>
+
+<p>and now some important things about the notification service class.
+First of all NLService class extends the NotificationListenerService class in witch extends the Service class.
+Now the whole bluetooth initialization and connection to the remote bluetooth is happening 
+inside the onCreate() method witch is run when user gives permission.
+<br>
+basically we this global variables</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">private</span> <span class="pl-k">static</span> <span class="pl-smi">BluetoothAdapter</span> mBluetoothAdapter;
+<span class="pl-k">private</span> <span class="pl-k">static</span> <span class="pl-smi">BluetoothSocket</span> mmSocket;
+<span class="pl-k">private</span> <span class="pl-k">static</span> <span class="pl-smi">BluetoothDevice</span> mmDevice;
+<span class="pl-k">private</span> <span class="pl-k">static</span> <span class="pl-smi">OutputStream</span> mmOutputStream;</pre></div>
+
+<p><br>
+The important stuff at onCreate.
+first we get a reference to the bluetooth adapter</p>
+
+<div class="highlight highlight-source-java"><pre> mBluetoothAdapter <span class="pl-k">=</span> <span class="pl-smi">BluetoothAdapter</span><span class="pl-k">.</span>getDefaultAdapter();
+        <span class="pl-c">//bluetooth hardware is absent</span>
+        <span class="pl-k">if</span>(mBluetoothAdapter <span class="pl-k">==</span> <span class="pl-c1">null</span>) {
+            makeText(<span class="pl-s"><span class="pl-pds">"</span>Device does not support Bluetooth! Exiting!<span class="pl-pds">"</span></span>);
+            <span class="pl-k">return</span>;
+        }</pre></div>
+
+<p><br>
+then we get the devices and we search for the remote bluetooth we want
+device.getName().startsWith("HC") HC is the name for my bluetooth</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">Set&lt;<span class="pl-smi">BluetoothDevice</span>&gt;</span> pairedDevices <span class="pl-k">=</span> mBluetoothAdapter<span class="pl-k">.</span>getBondedDevices();
+            <span class="pl-k">for</span> (<span class="pl-smi">BluetoothDevice</span> device <span class="pl-k">:</span> pairedDevices) {
+                <span class="pl-c">//HC is the remote bluetooth module</span>
+                <span class="pl-k">if</span> (device<span class="pl-k">.</span>getName()<span class="pl-k">.</span>startsWith(<span class="pl-s"><span class="pl-pds">"</span>HC<span class="pl-pds">"</span></span>)) {
+                    mmDevice <span class="pl-k">=</span> device;
+                    <span class="pl-k">break</span>;
+                }
+            }</pre></div>
+
+<p><br>
+As we found the bluetooth , we then connect to it.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-c">//Standard //SerialPortService ID //we need this</span>
+<span class="pl-smi">UUID</span> uuid <span class="pl-k">=</span> <span class="pl-c1">UUID</span><span class="pl-k">.</span>fromString(<span class="pl-s"><span class="pl-pds">"</span>00001101-0000-1000-8000-00805f9b34fb<span class="pl-pds">"</span></span>);
+mmSocket <span class="pl-k">=</span> mmDevice<span class="pl-k">.</span>createRfcommSocketToServiceRecord(uuid);
+mmSocket<span class="pl-k">.</span>connect();
+mmOutputStream <span class="pl-k">=</span> mmSocket<span class="pl-k">.</span>getOutputStream();</pre></div>
+
+<p><br>
+Thats it!
+The android bluetooth is now connected to the remote bluetooth.
+And we can start sending bytes.</p>
       </section>
     </div>
 
