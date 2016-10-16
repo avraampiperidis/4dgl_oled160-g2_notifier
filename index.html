@@ -65,7 +65,40 @@ from android to monitor.</p>
 <br>
 7)Any USB power bank
 <img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic6.png?raw=true" alt="uOLED-160G2">
+<br>
+8)Workshop4 IDE
+<a href="http://www.4dsystems.com.au/product/4D_Workshop_4_IDE/">link</a>
+<br>
+9)Android Studio
 <br></p>
+
+<h4>
+<a id="starting-from-android-studio" class="anchor" href="#starting-from-android-studio" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Starting from android studio</h4>
+
+<p>I will post small snippets of the actual code.
+Clone this git to get the whole project.</p>
+
+<p>first some important stuff about AndroidManifest.xml</p>
+
+<div class="highlight highlight-text-xml"><pre> &lt;<span class="pl-ent">uses-permission</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>android.permission.READ_PHONE_STATE<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">uses-permission</span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>android.permission.BLUETOOTH<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">uses-permission</span>
+android:name=<span class="pl-s"><span class="pl-pds">"</span>android.permission.BLUETOOTH_ADMIN<span class="pl-pds">"</span></span> /&gt;</pre></div>
+
+<p>android.permission.READ_PHONE_STATE to get the carrier network
+android.permission.BLUETOOTH_ADMIN to get access to turn off n on the bluetooth</p>
+
+<div class="highlight highlight-text-xml"><pre> &lt;<span class="pl-ent">service</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>com.example.abraham.iNotify.NLService<span class="pl-pds">"</span></span>
+            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">label</span>=<span class="pl-s"><span class="pl-pds">"</span>.NLService<span class="pl-pds">"</span></span>
+            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">permission</span>=<span class="pl-s"><span class="pl-pds">"</span>android.permission.BIND_NOTIFICATION_LISTENER_SERVICE<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">intent-filter</span>&gt;
+                &lt;<span class="pl-ent">action</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>android.service.notification.NotificationListenerService<span class="pl-pds">"</span></span> /&gt;
+            &lt;/<span class="pl-ent">intent-filter</span>&gt;
+&lt;/<span class="pl-ent">service</span>&gt;</pre></div>
+
+<p>We declare our notification service class.
+This service will run in the background,and will receive every notification.</p>
       </section>
     </div>
 
