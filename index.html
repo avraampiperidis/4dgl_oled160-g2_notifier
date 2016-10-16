@@ -73,12 +73,13 @@ from android to monitor.</p>
 <br></p>
 
 <h4>
-<a id="starting-from-android-studio" class="anchor" href="#starting-from-android-studio" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Starting from android studio</h4>
+<a id="starting-from-android-studio-and-the-app" class="anchor" href="#starting-from-android-studio-and-the-app" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Starting from Android Studio and the app</h4>
 
 <p>I will post small snippets of the actual code.
 Clone this git to get the whole project.</p>
 
-<p>first some important stuff about AndroidManifest.xml</p>
+<h5>
+<a id="first-some-important-stuff-about-androidmanifestxml" class="anchor" href="#first-some-important-stuff-about-androidmanifestxml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>first some important stuff about AndroidManifest.xml</h5>
 
 <div class="highlight highlight-text-xml"><pre> &lt;<span class="pl-ent">uses-permission</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>android.permission.READ_PHONE_STATE<span class="pl-pds">"</span></span> /&gt;
     &lt;<span class="pl-ent">uses-permission</span>
@@ -87,7 +88,9 @@ Clone this git to get the whole project.</p>
 android:name=<span class="pl-s"><span class="pl-pds">"</span>android.permission.BLUETOOTH_ADMIN<span class="pl-pds">"</span></span> /&gt;</pre></div>
 
 <p>android.permission.READ_PHONE_STATE to get the carrier network
-android.permission.BLUETOOTH_ADMIN to get access to turn off n on the bluetooth</p>
+android.permission.BLUETOOTH_ADMIN to get access to turn off n on the bluetooth
+<br>
+<br></p>
 
 <div class="highlight highlight-text-xml"><pre> &lt;<span class="pl-ent">service</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>com.example.abraham.iNotify.NLService<span class="pl-pds">"</span></span>
             <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">label</span>=<span class="pl-s"><span class="pl-pds">"</span>.NLService<span class="pl-pds">"</span></span>
@@ -98,7 +101,61 @@ android.permission.BLUETOOTH_ADMIN to get access to turn off n on the bluetooth<
 &lt;/<span class="pl-ent">service</span>&gt;</pre></div>
 
 <p>We declare our notification service class.
-This service will run in the background,and will receive every notification.</p>
+The service class is the NLService witch we will create later.
+This service will run in the background,and will receive every notification.
+<br>
+<br></p>
+
+<p>Basically its only three classes,MainActivity,NLService,Utilities
+NLService its the notification service.
+MainActivity its the app's main activity with some buttons
+Utilities contains some string n utils methods
+<br></p>
+
+<h5>
+<a id="mainactivity" class="anchor" href="#mainactivity" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MainActivity</h5>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">@Override</span>
+    <span class="pl-k">protected</span> <span class="pl-k">void</span> onCreate(<span class="pl-smi">Bundle</span> savedInstanceState) {
+        <span class="pl-v">super</span><span class="pl-k">.</span>onCreate(savedInstanceState);
+        setContentView(<span class="pl-smi">R</span><span class="pl-k">.</span>layout<span class="pl-k">.</span>activity_main);
+
+        <span class="pl-smi">Intent</span> intent <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">Intent</span>(<span class="pl-s"><span class="pl-pds">"</span>android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS<span class="pl-pds">"</span></span>);
+        startActivity(intent);
+}</pre></div>
+
+<p>Note this lines:
+Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+startActivity(intent);
+<br>
+this is needed to start an activity and the user can give permission to NLSerivce to run.
+<br>
+we need to mention the below method createNotification()
+witch can create notifications for test.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> createNotification(<span class="pl-smi">View</span> v) {
+        <span class="pl-smi">NotificationManager</span> nManager <span class="pl-k">=</span> (<span class="pl-smi">NotificationManager</span>) getSystemService(<span class="pl-c1">NOTIFICATION_SERVICE</span>);
+        <span class="pl-smi">NotificationCompat</span><span class="pl-k">.</span><span class="pl-smi">Builder</span> ncomp <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">NotificationCompat</span>.<span class="pl-smi">Builder</span>(<span class="pl-v">this</span>);
+        ncomp<span class="pl-k">.</span>setContentTitle(<span class="pl-s"><span class="pl-pds">"</span>My Notification Title<span class="pl-pds">"</span></span>);
+        ncomp<span class="pl-k">.</span>setContentText(<span class="pl-s"><span class="pl-pds">"</span>Notification example<span class="pl-pds">"</span></span>);
+        ncomp<span class="pl-k">.</span>setTicker(<span class="pl-s"><span class="pl-pds">"</span>Notification LExample<span class="pl-pds">"</span></span>);
+        ncomp<span class="pl-k">.</span>setSmallIcon(<span class="pl-smi">R</span><span class="pl-k">.</span>drawable<span class="pl-k">.</span>ic_launcher);
+        ncomp<span class="pl-k">.</span>setAutoCancel(<span class="pl-c1">true</span>);
+        nManager<span class="pl-k">.</span>notify((<span class="pl-k">int</span>)<span class="pl-smi">System</span><span class="pl-k">.</span>currentTimeMillis(),ncomp<span class="pl-k">.</span>build());
+}</pre></div>
+
+<p><br>
+and i have a sendMessage method
+witch takes the text from edittext and send's it to outputstream "bluetooth at our case"</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> sendMessage(<span class="pl-smi">View</span> view) throws <span class="pl-smi">IOException</span> {
+        <span class="pl-smi">EditText</span> editText <span class="pl-k">=</span> (<span class="pl-smi">EditText</span>) findViewById(<span class="pl-smi">R</span><span class="pl-k">.</span>id<span class="pl-k">.</span>edit_message);
+        <span class="pl-smi">String</span> textToSend <span class="pl-k">=</span> editText<span class="pl-k">.</span>getText()<span class="pl-k">.</span>toString();
+        <span class="pl-smi">NLService</span><span class="pl-k">.</span>sendMessage(textToSend);
+}</pre></div>
+
+<p><br>
+<br></p>
       </section>
     </div>
 
