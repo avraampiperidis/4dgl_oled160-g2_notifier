@@ -208,7 +208,132 @@ mmOutputStream <span class="pl-k">=</span> mmSocket<span class="pl-k">.</span>ge
 <p><br>
 Thats it!
 The android bluetooth is now connected to the remote bluetooth.
-And we can start sending bytes.</p>
+And we can start sending bytes.
+We can send bytes from the mmOutputStream object.
+<br>
+We start by sending first our network carrier name.<br></p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-smi">TelephonyManager</span> manager <span class="pl-k">=</span> (<span class="pl-smi">TelephonyManager</span>) getSystemService(<span class="pl-smi">Context</span><span class="pl-c1"><span class="pl-k">.</span>TELEPHONY_SERVICE</span>);
+<span class="pl-smi">String</span> carrierName <span class="pl-k">=</span> manager<span class="pl-k">.</span>getNetworkOperatorName();
+<span class="pl-k">if</span>(carrierName <span class="pl-k">==</span> <span class="pl-c1">null</span>) {
+     <span class="pl-c">//not sim/telephone</span>
+     makeText(<span class="pl-s"><span class="pl-pds">"</span>No telephony support!<span class="pl-pds">"</span></span>);
+} <span class="pl-k">else</span> {
+     mmOutputStream<span class="pl-k">.</span>write(carrierName<span class="pl-k">.</span>getBytes());
+     mmOutputStream<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">"</span>   iNotify               <span class="pl-pds">"</span></span><span class="pl-k">.</span>getBytes());
+}</pre></div>
+
+<p>And the results in two pictures.
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic7.jpg?raw=true" alt="pic7"><br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic8.jpg?raw=true" alt="pic8">
+<br>
+for the time i have a thread running forever and sending time every one minute.
+the time wont be sent if the monitor has an notification and the user hasn't read it.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-c">//every 1 minute send time</span>
+<span class="pl-c">//better to change to global variable thread</span>
+        <span class="pl-k">new</span> <span class="pl-smi">Thread</span>() {
+            <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">run</span>() {
+
+                <span class="pl-k">while</span> (<span class="pl-c1">true</span>) {
+
+                    <span class="pl-k">try</span> {
+                        <span class="pl-c">//60000 millis = 1 min</span>
+                        <span class="pl-smi">Thread</span><span class="pl-k">.</span>sleep(<span class="pl-c1">60000</span>);
+                        <span class="pl-c">//if false means user read/cleaned all notifications</span>
+                        <span class="pl-k">if</span> (notifyRead <span class="pl-k">==</span> <span class="pl-c1">false</span>) {
+
+                            <span class="pl-smi">Calendar</span> c <span class="pl-k">=</span> <span class="pl-smi">Calendar</span><span class="pl-k">.</span>getInstance();
+                            <span class="pl-k">int</span> minutes <span class="pl-k">=</span> c<span class="pl-k">.</span>get(<span class="pl-smi">Calendar</span><span class="pl-c1"><span class="pl-k">.</span>MINUTE</span>);
+                            <span class="pl-k">int</span> hour <span class="pl-k">=</span> c<span class="pl-k">.</span>get(<span class="pl-smi">Calendar</span><span class="pl-c1"><span class="pl-k">.</span>HOUR</span>);
+                            <span class="pl-smi">String</span> time <span class="pl-k">=</span> hour <span class="pl-k">+</span> <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> <span class="pl-k">+</span> minutes;
+
+                            <span class="pl-k">try</span> {
+                                mmOutputStream<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">'</span>~<span class="pl-pds">'</span></span>);
+                                mmOutputStream<span class="pl-k">.</span>write(time<span class="pl-k">.</span>getBytes());
+                            } <span class="pl-k">catch</span> (<span class="pl-smi">IOException</span> e) {
+                                e<span class="pl-k">.</span>printStackTrace();
+                            }
+                        }
+
+                    } <span class="pl-k">catch</span> (<span class="pl-smi">InterruptedException</span> e) {
+                        e<span class="pl-k">.</span>printStackTrace();
+                    }
+
+                }
+            }
+}<span class="pl-k">.</span>start();</pre></div>
+
+<p><br>
+We override onNotificationPosted() method.<br>
+This methods gets called for every notification the phone gets.<br>
+It carries an object(StatusBarNotification) with the content of the notification.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> onNotificationPosted(<span class="pl-smi">StatusBarNotification</span> sbn) {
+      <span class="pl-c1">...</span>
+      <span class="pl-c">//In General the Basic flow</span>
+      <span class="pl-c">//First get the notification object</span>
+      <span class="pl-smi">Notification</span> mNotification <span class="pl-k">=</span> sbn<span class="pl-k">.</span>getNotification();
+      <span class="pl-c">//from that we only care about the title</span>
+      <span class="pl-smi">String</span> title <span class="pl-k">=</span> mNotification<span class="pl-k">.</span>extras<span class="pl-k">.</span>getString(<span class="pl-smi">Notification</span><span class="pl-c1"><span class="pl-k">.</span>EXTRA_TITLE</span>);
+      <span class="pl-c">//and the content text</span>
+      <span class="pl-smi">String</span> text <span class="pl-k">=</span> mNotification<span class="pl-k">.</span>extras<span class="pl-k">.</span>getString(<span class="pl-smi">Notification</span><span class="pl-c1"><span class="pl-k">.</span>EXTRA_TEXT</span>);
+      <span class="pl-c">//I guest you can get other things to like icons ,keys...</span>
+
+      <span class="pl-c">//and now that we have the content of the new notification</span>
+      <span class="pl-c">//we want to send it to the bluetooth</span>
+      mmOutputStream<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">'</span>&gt;<span class="pl-pds">'</span></span>);
+      mmOutputStream<span class="pl-k">.</span>write(text<span class="pl-k">.</span>getBytes());
+
+      <span class="pl-c">//true because its new notification, till the user press clear/clean from top bar it wont change.</span>
+      notifyRead <span class="pl-k">=</span> <span class="pl-c1">true</span>;
+      <span class="pl-c1">...</span>
+}</pre></div>
+
+<p><br>
+Next we override this method onNotificationRemoved.<br>
+This method gets called when the user cleans the notifications.</p>
+
+<div class="highlight highlight-source-java"><pre> <span class="pl-k">@Override</span>
+    <span class="pl-k">public</span> <span class="pl-k">void</span> onNotificationRemoved(<span class="pl-smi">StatusBarNotification</span> sbn) {
+        <span class="pl-k">if</span>(inputKeyboard <span class="pl-k">==</span> <span class="pl-c1">true</span>) {
+            inputKeyboard <span class="pl-k">=</span> <span class="pl-c1">false</span>;
+        } <span class="pl-k">else</span> {
+            <span class="pl-k">try</span> {
+                notifyRead <span class="pl-k">=</span> <span class="pl-c1">false</span>;
+                mmOutputStream<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">'</span>`<span class="pl-pds">'</span></span>);
+            } <span class="pl-k">catch</span> (<span class="pl-smi">IOException</span> e) {
+                e<span class="pl-k">.</span>printStackTrace();
+            }
+        }
+}</pre></div>
+
+<p>basically the notifyRead = false means the user have read the notification<br>
+and the clock/time thread will send time normaly.<br>
+mmOutputStream.write('<code>') the '</code>' Character is a key for the monitor side code to clear the screen.
+<br>
+And this is how we send messages</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">static</span>  <span class="pl-k">void</span> sendMessage(<span class="pl-smi">String</span> s) throws <span class="pl-smi">IOException</span> {
+        <span class="pl-k">try</span> {
+            mmOutputStream<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">'</span>&gt;<span class="pl-pds">'</span></span>);
+            mmOutputStream<span class="pl-k">.</span>write(s<span class="pl-k">.</span>getBytes());
+        } <span class="pl-k">catch</span> (<span class="pl-smi">IOException</span> ex) {
+        }
+    }</pre></div>
+
+<p>the Character &gt; means create new line for the monitor.
+<br></p>
+
+<h4>
+<a id="uoled-160-g2-display-module" class="anchor" href="#uoled-160-g2-display-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>uOLED-160-G2 Display Module</h4>
+
+<p>Now that we finished from the android app<br>
+we gona see how to 
+*build/connect/put together the modules<br>
+*program the driver module
+*and start it.
+<br></p>
       </section>
     </div>
 
