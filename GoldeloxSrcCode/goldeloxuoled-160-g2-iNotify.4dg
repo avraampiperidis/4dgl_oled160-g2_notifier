@@ -43,7 +43,7 @@ func main()
     setbaud(BAUD_9600);    //  9600 baud comms
 
     // set up a comms circular buffer, use the entire buffer, no sync character
-    com_Init(combuf, 48, 0);
+    com_Init(combuf, 96, 0);
 
     repeat
         repeat
