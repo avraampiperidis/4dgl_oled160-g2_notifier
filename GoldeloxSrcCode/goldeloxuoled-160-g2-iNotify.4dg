@@ -13,8 +13,8 @@ func cleanScrean()
 endfunc
 
 
-//48 vars = 96 chars
-var combuf[48];
+//96 vars = 96 chars
+var combuf[96];
 //-------------------------------------------------------------------------------------------//
 func main()
     var chr, e, e2;
