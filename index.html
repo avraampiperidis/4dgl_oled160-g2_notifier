@@ -355,6 +355,157 @@ From the above we need to remember/know the following:<br>
 
 <h5>
 <a id="1connect-the-display-to-the-pc" class="anchor" href="#1connect-the-display-to-the-pc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>1)connect the display to the PC</h5>
+
+<p>connect the display using the uUSB-PA5-II Programming Adaptor or the 
+Programming Cable.<br>
+see info here <a href="http://www.4dsystems.com.au/product/uUSB_PA5/">info</a>
+<br> and here
+<a href="http://www.4dsystems.com.au/product/4D-Programming-Cable/">info</a>
+<br>
+When connecting the display to pc remember <br>
+the display pins to connect to cable are 1,3,5,7,9 <br>
+and it goes ,+5V to +5v,RX to RX,TX to TX,GND to GND,RES to RES.<br>
+Check the official quick start guide pdf<br>
+<a href="http://www.4dsystems.com.au/productpages/GOLDELOX/downloads/GOLDELOX_qsg_R_1_0.pdf">guide</a>
+<br></p>
+
+<h5>
+<a id="2make-the-program-and-load-it" class="anchor" href="#2make-the-program-and-load-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>2)make the program and load it</h5>
+
+<p>the language its 4DGL and its kind similar with c.<br>
+lets define a simple function<br>
+the bolow function clean the screen contents<br></p>
+
+<div class="highlight highlight-source-c"><pre>func <span class="pl-en">cleanScrean</span>()
+      var count := 0;
+      <span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">1</span>,<span class="pl-c1">0</span>);
+      <span class="pl-k">while</span>(count &lt; <span class="pl-c1">16</span>)
+           <span class="pl-en">print</span>(<span class="pl-s"><span class="pl-pds">"</span>                                  <span class="pl-cce">\n</span><span class="pl-pds">"</span></span>);
+           count++;
+      wend
+      <span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">1</span>,<span class="pl-c1">0</span>);
+      count := <span class="pl-c1">0</span>;
+endfunc</pre></div>
+
+<p>Note: the code im writing here its not complete!<br>
+its just the important parts.<br>
+The program starts with the func main()<br>
+we declare a global variable var combuf[96]; to store characters.<br>
+The first think that is happening when the program begins is below in code.<br></p>
+
+<div class="highlight highlight-source-c"><pre><span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>); <span class="pl-c">// reset cursor to line 1, column 1</span>
+<span class="pl-en">putstr</span>(<span class="pl-s"><span class="pl-pds">"</span>Connecting..pass:1234<span class="pl-pds">"</span></span>);
+<span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">0</span>,<span class="pl-c1">0</span>);
+...
+<span class="pl-c">// set up a comms circular buffer, use the entire buffer, no sync character</span>
+<span class="pl-en">com_Init</span>(combuf, <span class="pl-c1">96</span>, <span class="pl-c1">0</span>);</pre></div>
+
+<p>move the cursor at the beginning and show Connecting..pass:1234.<br>
+for my bluetooth modules the password was 1234.<br>
+After that we have a never ending repeat with some while loops.<br>
+The while loops is when there is input bytestream,<br>
+for every single char is one loop.<br>
+<br>
+Inside the while loops i'm checking some special characters that i'm passing from android app we made previous.<br>
+first check is the clean screen char im sending from android app.</p>
+
+<div class="highlight highlight-source-c"><pre> <span class="pl-k">while</span> ((<span class="pl-k">char</span> := serin()) &gt;= <span class="pl-c1">0</span>) 
+
+    <span class="pl-c">//` special char indicate clearScreen</span>
+    <span class="pl-k">if</span>(<span class="pl-k">char</span> == <span class="pl-s"><span class="pl-pds">'</span>`<span class="pl-pds">'</span></span>)
+       <span class="pl-en">cleanScrean</span>();
+       ref := <span class="pl-c1">0</span>;
+    endif
+
+ wend</pre></div>
+
+<p><br>
+Another special char im sending from android is to show time.<br></p>
+
+<div class="highlight highlight-source-c"><pre> <span class="pl-c">//special char, show time</span>
+               <span class="pl-k">if</span>(<span class="pl-k">char</span> == <span class="pl-s"><span class="pl-pds">'</span>~<span class="pl-pds">'</span></span>)
+                    <span class="pl-en">cleanScrean</span>();
+
+                    <span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">6</span>,<span class="pl-c1">4</span>);
+                    <span class="pl-en">txt_Set</span>(TEXT_WIDTH,<span class="pl-c1">3</span>);
+                    <span class="pl-en">txt_Set</span>(TEXT_HEIGHT,<span class="pl-c1">3</span>);
+
+                    <span class="pl-k">while</span> ((<span class="pl-k">char</span> := serin()) &gt;= <span class="pl-c1">0</span>)
+                        <span class="pl-k">if</span>(timeloop &gt;= <span class="pl-c1">5</span>)
+                            ref := <span class="pl-c1">0</span>;
+                            <span class="pl-en">txt_Set</span>(TEXT_WIDTH,<span class="pl-c1">1</span>);
+                            <span class="pl-en">txt_Set</span>(TEXT_HEIGHT,<span class="pl-c1">1</span>);
+                            <span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">1</span>,<span class="pl-c1">0</span>);
+                            timeloop := <span class="pl-c1">0</span>;
+                            <span class="pl-k">break</span>;
+                        <span class="pl-k">else</span>
+                        <span class="pl-en">txt_Set</span>(TEXT_WIDTH,<span class="pl-c1">3</span>);
+                        <span class="pl-en">txt_Set</span>(TEXT_HEIGHT,<span class="pl-c1">3</span>);
+                        <span class="pl-c">//putch this is whene the characters become visible in the display</span>
+                        <span class="pl-en">putch</span>(<span class="pl-k">char</span>);
+                        timeloop++;
+                        endif
+                    wend
+
+                  <span class="pl-en">txt_MoveCursor</span>(<span class="pl-c1">1</span>,<span class="pl-c1">0</span>);
+endif</pre></div>
+
+<p>Another spacial char is the create new line char.<br></p>
+
+<div class="highlight highlight-source-c"><pre><span class="pl-c">//new line</span>
+              <span class="pl-k">if</span>(<span class="pl-k">char</span> == <span class="pl-s"><span class="pl-pds">'</span>&gt;<span class="pl-pds">'</span></span>)
+                <span class="pl-c">//14 lines is max</span>
+                <span class="pl-c">//so clean screen and start from top</span>
+                <span class="pl-k">if</span>(ref == <span class="pl-c1">14</span>)
+                    <span class="pl-en">cleanScrean</span>();
+                    ref :=<span class="pl-c1">0</span>;
+                endif
+                <span class="pl-en">print</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>);
+                c := <span class="pl-c1">0</span>;
+                ref++;
+endif</pre></div>
+
+<p>Except the special chars , all the others goes directly to the screen.<br></p>
+
+<div class="highlight highlight-source-c"><pre><span class="pl-c">//print char</span>
+<span class="pl-en">putch</span>(<span class="pl-k">char</span>);</pre></div>
+
+<p><br></p>
+
+<h5>
+<a id="3buildconnectput-together-the-modules" class="anchor" href="#3buildconnectput-together-the-modules" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>3)build/connect/put together the modules</h5>
+
+<p><br>
+Now that the code is made and loaded to the display we need to put together the bluetooth,usb power bank and the display.<br>
+First lest connect the bluetooth to the display.<br>
+here are the bluetooth pins.<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic12.jpg?raw=true" alt="pic11">
+<br>
+to make the connections we need this.<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic5.jpg?raw=true" alt="wires">
+<br>
+and the connections from bluetooth to display is the following.<br>
+<strong>bluetooth VCC PIN&lt;--&gt; display 5V out PIN 2</strong><br>
+<strong>bluetooth TXD PIN &lt;--&gt; display RX PIN 5</strong><br>
+<strong>bluetooth GND PIN &lt;--&gt; display GND PIN 8</strong><br>
+<br>
+secondly we gona connect the usb power bank to display.<br>
+to make the connections we need this.<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic5.png?raw=true" alt="power cable">
+<br>
+and the connections from usb cable pins to display is the following.<br>
+<strong>Usb VCC+ PIN&lt;--&gt; display +5V PIN 1</strong><br>
+<strong>Usb GND PIN &lt;--&gt; display GND PIN 7</strong><br>
+<br>
+That's it plug in the usb power bank<br>
+and will start waiting for connection.<br>
+And the results.<br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic13.jpg?raw=true" alt="display"><br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic14.jpg?raw=true" alt="display"><br>
+<img src="https://github.com/avraampiperidis/4dgl_oled160-g2_notifier/blob/master/pagepics/pic15.jpg?raw=true" alt="display"><br>
+<br>
+In the future if i have time i will create a mini game arcade style based on this,<br>
+and it will be controlled from android.</p>
       </section>
     </div>
 
