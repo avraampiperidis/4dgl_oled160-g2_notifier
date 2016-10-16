@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
         NotificationManager nManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder ncomp = new NotificationCompat.Builder(this);
         ncomp.setContentTitle("My Notification Title");
-        ncomp.setContentText("Notification Listener Service Example");
+        ncomp.setContentText("Notification Example");
         ncomp.setTicker("Notification Listener Service Example");
         ncomp.setSmallIcon(R.drawable.ic_launcher);
         ncomp.setAutoCancel(true);
